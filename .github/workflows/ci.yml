@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: solutiva
+          POSTGRES_PASSWORD: solutiva_dev
+          POSTGRES_DB: solutiva_court
+        ports:
+          - 5437:5432
+        options: >-
+          --health-cmd "pg_isready -U solutiva -d solutiva_court"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6382:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://solutiva:solutiva_dev@localhost:5437/solutiva_court?schema=public
+      REDIS_URL: redis://localhost:6382
+      API_URL: http://localhost:4000
+      API_PORT: "4000"
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      VERIFY_WEB_PORT: "3099"
+      CHAIN_ENABLED: "false"
+      NEXT_PUBLIC_CHAIN_ENABLED: "false"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare database
+        run: npm run db:generate && npm run db:push && npm run db:seed
+
+      - name: Start API
+        run: npm run start --workspace=apps/api &
+
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:4000/health >/dev/null; then
+              echo "API ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "API failed to start"
+          exit 1
+
+      - name: Build and smoke test
+        run: node scripts/verify.mjs

@@ -1,0 +1,16 @@
+node_modules
+**/node_modules
+**/.next
+.git
+.gitignore
+**/*.md
+.cursor
+terminals
+*.log
+.env
+.env.*
+!.env.example
+apps/web/.next
+apps/api/dist
+packages/contracts/artifacts
+packages/contracts/cache

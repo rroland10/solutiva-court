@@ -1,0 +1,51 @@
+{
+  "name": "solutiva-court",
+  "version": "5.0.0",
+  "private": true,
+  "description": "Decentralized dispute resolution platform - Next Generation Justice",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
+    "dev:clean": "concurrently \"npm run dev:clean --workspace=apps/web\" \"npm run dev:api\"",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "build": "npm run build --workspace=apps/web && npm run build --workspace=apps/api",
+    "start": "concurrently \"npm run start --workspace=apps/web\" \"npm run start --workspace=apps/api\"",
+    "start:prod": "npm run build && npm run start",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:prod:up": "node scripts/docker-prod-up.mjs",
+    "docker:prod:down": "docker compose -f docker-compose.prod.yml down",
+    "docker:prod:logs": "docker compose -f docker-compose.prod.yml logs -f",
+    "smoke:api": "node scripts/smoke-api.mjs",
+    "smoke:web": "node scripts/smoke-web.mjs",
+    "smoke": "npm run smoke:api && npm run smoke:web",
+    "verify": "node scripts/verify.mjs",
+    "contracts:compile": "npm run compile --workspace=@solutiva/contracts",
+    "contracts:export": "npm run export-abis --workspace=@solutiva/contracts",
+    "contracts:deploy:local": "npm run deploy:local --workspace=@solutiva/contracts",
+    "contracts:deploy:sepolia": "npm run deploy:sepolia --workspace=@solutiva/contracts"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prisma": "^6.8.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "overrides": {
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
+  }
+}

@@ -1,0 +1,78 @@
+# Full stack: Postgres + Redis + API + Web
+# Stop host servers on :3000/:4000 before: npm run docker:prod:down (host) && npm run docker:prod:up
+
+name: solutiva-prod
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: solutiva-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: solutiva
+      POSTGRES_PASSWORD: solutiva_dev
+      POSTGRES_DB: solutiva_court
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U solutiva -d solutiva_court"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: solutiva-redis-prod
+    restart: unless-stopped
+    volumes:
+      - redis_prod_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: solutiva-api-prod
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      API_PORT: "4000"
+      DATABASE_URL: postgresql://solutiva:solutiva_dev@postgres:5432/solutiva_court?schema=public
+      REDIS_URL: redis://redis:6379
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      CHAIN_ENABLED: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "npx prisma db push &&
+             (npx prisma db seed || true) &&
+             node dist/index.js"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: solutiva-web-prod
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_PUBLIC_CHAIN_ENABLED: "false"
+    depends_on:
+      - api
+
+volumes:
+  postgres_prod_data:
+  redis_prod_data:
