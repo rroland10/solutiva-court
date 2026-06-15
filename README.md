@@ -242,6 +242,14 @@ npm run start:prod            # build + start API and web on :4000 / :3000
 npm run verify                # build + smoke tests (web on :3099)
 ```
 
+## Cloud deploy
+
+**Docker (any VPS / Railway / Fly.io / Render):** use `docker-compose.prod.yml`. Set production env vars (see `.env.example`), especially `DATABASE_URL`, `REDIS_URL`, `NEXT_PUBLIC_API_URL`, and `NEXT_PUBLIC_SITE_URL`. Point the public web URL at the web service and ensure the browser can reach the API (same host with a reverse proxy, or set `NEXT_PUBLIC_API_URL` to the API’s public URL).
+
+**Split hosting:** deploy `apps/web` to Vercel (Next.js standalone) and `apps/api` to a Node host with Postgres + Redis. Mirror contract and chain vars on both sides.
+
+**CI:** GitHub Actions runs build + smoke on every push to `main` (see `.github/workflows/ci.yml`).
+
 ## License
 
 MIT

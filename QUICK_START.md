@@ -1,54 +1,41 @@
-# 🚀 Quick Start Guide
+# Quick Start
 
-## Start the Application (Choose One Method)
+## Prerequisites
 
-### Method 1: Use the Launch Script (Recommended)
+- Node.js 20+
+- Docker & Docker Compose
+
+## Development (recommended)
+
 ```bash
-./start.sh
+npm install
+cp .env.example .env
+npm run docker:up          # Postgres :5437, Redis :6382
+npm run db:generate
+npm run db:push
+npm run db:seed
+npm run dev                # Web :3000, API :4000
 ```
 
-### Method 2: Direct Python Server
+Open **http://localhost:3000**
+
+## Production on this machine
+
 ```bash
-python3 -m http.server 8000
+npm run docker:prod:up     # Full stack in Docker
+# or
+npm run start:prod         # Build + run on host (:3000 / :4000)
 ```
 
-### Method 3: Open Directly in Browser
-Simply double-click `index.html` in your file explorer.
+## Verify
 
-## Access the Application
-
-Open your web browser and go to:
-**http://localhost:8000**
-
-## What You'll See
-
-1. **Dashboard** - Overview with statistics and quick actions
-2. **Disputes** - Create and manage legal disputes
-3. **Jury Pool** - Participate in decentralized voting
-4. **Profile** - Manage your identity and settings
-
-## Key Features to Try
-
-- ✅ Click navigation tabs to switch between pages
-- ✅ Click "Create New Dispute" to see the modal form
-- ✅ Click "Join Jury Pool" to toggle jury membership
-- ✅ Watch for real-time notifications (appear every 10 seconds)
-- ✅ Try the voting interface in the Jury section
-- ✅ Check the responsive design by resizing your browser
-
-## Troubleshooting
-
-- **Port 8000 in use?** The script will automatically try different servers
-- **No server found?** Install Python 3, Node.js, or PHP
-- **Page not loading?** Check that all files are in the same directory
-
-## File Structure
-```
-├── index.html      # Main application
-├── css/styles.css  # All styling
-├── js/app.js       # All functionality
-├── start.sh        # Launch script
-└── README.md       # Detailed documentation
+```bash
+npm run smoke              # API + web (dev servers must be running)
+npm run verify             # Build + smoke (starts prod web on :3099)
 ```
 
-Enjoy exploring Solutiva Court! ⚖️ 
+## Legacy `index.html`
+
+The root `index.html` only redirects to the Next.js app. Use `npm run dev` or Docker instead of opening it directly.
+
+See [README.md](./README.md) for API routes, keyboard shortcuts, and hybrid on-chain setup.

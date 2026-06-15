@@ -29,17 +29,26 @@ async function runWebSmokeOnProduction() {
   const webUrl = `http://localhost:${VERIFY_WEB_PORT}`;
   const proc = spawn(
     "npm",
-    ["run", "start", "--workspace=apps/web", "--", "-p", String(VERIFY_WEB_PORT)],
-    { cwd: root, stdio: "pipe", env: process.env }
+    [
+      "run",
+      "start",
+      "--workspace=apps/web",
+      "--",
+      "-p",
+      String(VERIFY_WEB_PORT),
+      "-H",
+      "127.0.0.1",
+    ],
+    { cwd: root, stdio: "ignore", env: process.env }
   );
 
   let started = false;
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 120; i++) {
     if (await isReachable(webUrl)) {
       started = true;
       break;
     }
-    await sleep(250);
+    await sleep(500);
   }
 
   if (!started) {
@@ -55,8 +64,12 @@ async function runWebSmokeOnProduction() {
 }
 
 async function main() {
-  console.log("Verifying Solutiva Court build...\n");
-  run("npm run build");
+  if (process.env.VERIFY_SKIP_BUILD !== "1") {
+    console.log("Verifying Solutiva Court build...\n");
+    run("npm run build");
+  } else {
+    console.log("Skipping build (VERIFY_SKIP_BUILD=1)\n");
+  }
 
   console.log("\nChecking runtime smoke tests...\n");
 

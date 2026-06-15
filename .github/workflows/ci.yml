@@ -45,6 +45,7 @@ jobs:
       VERIFY_WEB_PORT: "3099"
       CHAIN_ENABLED: "false"
       NEXT_PUBLIC_CHAIN_ENABLED: "false"
+      NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
       - uses: actions/checkout@v4
@@ -79,5 +80,10 @@ jobs:
           curl -v http://localhost:4000/health || true
           exit 1
 
-      - name: Build and smoke test
+      - name: Build web
+        run: npm run build --workspace=apps/web
+
+      - name: Smoke test
         run: node scripts/verify.mjs
+        env:
+          VERIFY_SKIP_BUILD: "1"
