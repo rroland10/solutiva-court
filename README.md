@@ -2,6 +2,8 @@
 
 A decentralized dispute resolution platform built with a modern full-stack TypeScript architecture.
 
+**Repository:** [github.com/rroland10/solutiva-court](https://github.com/rroland10/solutiva-court)
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -147,6 +149,7 @@ Combine params: `/disputes?status=PENDING&mine=1`
 | `a` | Filter active disputes (Disputes page) |
 | `s` | Filter my pending cases (Disputes page) |
 | `/` | Focus search (Disputes page) |
+| `t` | Toggle light / dark theme |
 | `?` | Show shortcuts help |
 
 ### AVF rewards
@@ -206,11 +209,37 @@ npm run verify       # Build + smoke (starts production web on :3099 for web tes
 - **dispute-processing**: AI analysis of new disputes
 - **seo-indexing**: Google Indexing API notifications for new dispute pages
 
+## Theme
+
+The web app supports **light**, **dark**, and **system** appearance. Use the header toggle, Profile → Appearance, or press **`t`**. Preference is stored in `localStorage` (`solutiva-theme`) and applied before first paint to avoid flash.
+
 ## Docker
 
+### Development (Postgres + Redis only)
+
 ```bash
-docker compose up -d          # PostgreSQL + Redis
-docker compose down           # Stop services
+npm run docker:up             # PostgreSQL :5437, Redis :6382
+npm run docker:down           # Stop services
+```
+
+### Production (full stack in containers)
+
+Builds and runs API + web + Postgres + Redis. Stop any host servers on **:3000** and **:4000** first.
+
+```bash
+npm run docker:prod:up        # Build images, start stack, seed DB
+npm run docker:prod:logs      # Follow logs
+npm run docker:prod:down      # Tear down stack
+```
+
+- **Web:** http://localhost:3000  
+- **API:** http://localhost:4000/health  
+
+### Host production (no Docker for app tier)
+
+```bash
+npm run start:prod            # build + start API and web on :4000 / :3000
+npm run verify                # build + smoke tests (web on :3099)
 ```
 
 ## License
