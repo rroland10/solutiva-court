@@ -244,11 +244,19 @@ npm run verify                # build + smoke tests (web on :3099)
 
 ## Cloud deploy
 
-**Docker (any VPS / Railway / Fly.io / Render):** use `docker-compose.prod.yml`. Set production env vars (see `.env.example`), especially `DATABASE_URL`, `REDIS_URL`, `NEXT_PUBLIC_API_URL`, and `NEXT_PUBLIC_SITE_URL`. Point the public web URL at the web service and ensure the browser can reach the API (same host with a reverse proxy, or set `NEXT_PUBLIC_API_URL` to the API’s public URL).
+**Docker (VPS / Railway / Fly.io):** use `docker-compose.prod.yml` with env from `.env.production.example`. Set public `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_API_URL` **before building the web image** — Next.js embeds those at build time.
 
-**Split hosting:** deploy `apps/web` to Vercel (Next.js standalone) and `apps/api` to a Node host with Postgres + Redis. Mirror contract and chain vars on both sides.
+```bash
+cp .env.production.example .env
+# edit .env with your public URLs and secrets
+npm run docker:prod:up
+```
 
-**CI:** GitHub Actions runs build + smoke on every push to `main` (see `.github/workflows/ci.yml`).
+**Render:** connect the repo and apply [`render.yaml`](./render.yaml) as a Blueprint. After the API deploys, set `NEXT_PUBLIC_API_URL` on **solutiva-web** to the API service URL (e.g. `https://solutiva-api.onrender.com`), then redeploy web.
+
+**Split hosting:** deploy `apps/web` to Vercel and `apps/api` to any Node host with Postgres + Redis. Set the same `NEXT_PUBLIC_*` vars in Vercel project settings at build time.
+
+**CI:** GitHub Actions runs build + smoke on every push to `main` (see `.github/workflows/ci.yml`). Dependabot opens weekly npm PRs (see `.github/dependabot.yml`).
 
 ## License
 

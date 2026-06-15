@@ -43,10 +43,11 @@ services:
     environment:
       NODE_ENV: production
       API_PORT: "4000"
-      DATABASE_URL: postgresql://solutiva:solutiva_dev@postgres:5432/solutiva_court?schema=public
-      REDIS_URL: redis://redis:6379
-      NEXT_PUBLIC_SITE_URL: http://localhost:3000
-      CHAIN_ENABLED: "false"
+      DATABASE_URL: ${DATABASE_URL:-postgresql://solutiva:solutiva_dev@postgres:5432/solutiva_court?schema=public}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      CHAIN_ENABLED: ${CHAIN_ENABLED:-false}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,15 +62,16 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_CHAIN_ENABLED: ${NEXT_PUBLIC_CHAIN_ENABLED:-false}
     container_name: solutiva-web-prod
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://localhost:4000
-      NEXT_PUBLIC_SITE_URL: http://localhost:3000
-      NEXT_PUBLIC_CHAIN_ENABLED: "false"
     depends_on:
       - api
 
